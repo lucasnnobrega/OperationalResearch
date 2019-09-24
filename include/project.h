@@ -11,7 +11,7 @@
 #define RED "\e[31m"
 #define RESET "\e[0m"
 
-int PrimeiraEtapa(char verbose);
+int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose);
 int SegundaEtapa();
 
 #endif //PROJECT

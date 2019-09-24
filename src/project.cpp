@@ -14,7 +14,7 @@ K   Conjunto de seção onde k = (dia,horário,sala).
 Bij Conjunto de pesos que relacionam a temática dos projetos, colocando um peso maior naqueles com a mesma área temática. i, j ∈ conjuntos de projetos.
 */
 
-int PrimeiraEtapa(char verbose)
+int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
 {
     // Criando o Ambiente
     IloEnv env;
@@ -30,11 +30,10 @@ int PrimeiraEtapa(char verbose)
 
     // DADOS
     // Variavel que armazena o nº de projetos
-    int nProjetos = 4;
-
-    int nDias = 3;
+    // int nProjetos = 4;
+    // int nDias = 1;
     int nHorarios = 4;
-    int nSalas = 6;
+    // int nSalas = 1;
 
     // Conjunto de seção onde k = (dia,horário,sala).
     std::vector<std::vector<int>> K;
@@ -63,18 +62,19 @@ int PrimeiraEtapa(char verbose)
     std::cout << "nSalas: " << nSalas << std::endl;
 
     std::cout << "K size: " << K.size() << std::endl;
-    std::cout << "K size (math): " << nDias * nHorarios * nSalas << std::endl;
+    std::cout << "K size (math): " << nDias * nHorarios * nSalas << std::endl
+              << std::endl;
 
-    /*
-    //conferindo o resultado
-    for (auto i : K)
+    if (verbose > 2)
     {
-        std::cout << "Inst: " << std::endl;
-        std::cout << " i[0]: " << i[0] << std::endl;
-        std::cout << " i[1]: " << i[1] << std::endl;
-        std::cout << " i[2]: " << i[2] << std::endl;
+        //conferindo o resultado
+        for (auto i : K)
+        {
+            std::cout << "Inst: " << std::endl;
+            std::cout << " i[0]: " << i[0] << " i[1]: " << i[1] << " i[2]: " << i[2] << std::endl;
+        }
     }
-    */
+    std::cout << std::endl;
 
     // Conjunto de pesos que relacionam a temática dos projetos, colocando um peso maior naqueles com a mesma área temática.
     // i, j ∈ conjuntos de projetos.
@@ -84,30 +84,60 @@ int PrimeiraEtapa(char verbose)
     {
         for (auto j = i; j < nProjetos; j++)
         {
+            // Relação entre o projeto e ele mesmo
             if (i == j)
             {
                 continue;
             }
-            std::random_device rd;
-            std::uniform_int_distribution<int> dist(0, 8);
-            //std::cout << dist(rd) << std::endl;
-            B[i][j] = dist(rd);
+            // Outros casos
+            else
+            {
 
-            B[j][i] = B[i][j];
+                std::random_device rd;
+                std::uniform_int_distribution<int> dist(0, 8);
+                //std::cout << dist(rd) << std::endl;
+                B[i][j] = dist(rd);
+
+                B[j][i] = B[i][j];
+            }
         }
     }
 
-    if (verbose == 'd')
+    // TO REMOVE
+    B[4][2] = 20;
+    B[2][4] = 20;
+    B[5][4] = 22;
+    B[4][5] = 22;
+
+    if (verbose > 2)
     {
         for (auto i = 0; i < nProjetos; i++)
         {
             for (auto j = 0; j < nProjetos; j++)
             {
-                printf("B[%d][%d]: %d \n", i, j, B[i][j]);
+                printf("B[%d][%d]: %d | ", i, j, B[i][j]);
                 printf("B[%d][%d]: %d \n", j, i, B[j][i]);
                 printf("\n");
             }
         }
+    }
+
+    std::vector<int> C(K.size());
+
+    int aux = 1000 * C.size();
+    for (auto i = 0; i < C.size(); i++)
+    {
+        C[i] = aux;
+        aux -= 1000;
+    }
+
+    if (verbose > 2)
+    {
+        for (auto i = 0; i < C.size(); i++)
+        {
+            printf("C[%d] = %d ", i, C[i]);
+        }
+        std::cout << std::endl;
     }
 
     //
@@ -120,7 +150,8 @@ int PrimeiraEtapa(char verbose)
     // VARIAVEIS
 
     // y_kj
-    IloArray<IloBoolVarArray> y(env, K.size());
+    IloArray<IloBoolVarArray>
+        y(env, K.size());
 
     for (int k = 0; k < K.size(); k++)
     {
@@ -140,7 +171,7 @@ int PrimeiraEtapa(char verbose)
             modelo.add(y[k][j]);
         }
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "y created" << std::endl;
 
     //* Variaveis
@@ -174,7 +205,7 @@ int PrimeiraEtapa(char verbose)
             }
         }
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "x created" << std::endl;
 
     // ███████╗ ██████╗
@@ -192,7 +223,10 @@ int PrimeiraEtapa(char verbose)
         {
             for (int j = 0; j < nProjetos; j++)
             {
-                soma += B[i][j] * x[k][i][j];
+                if (i != j)
+                {
+                    soma += C[k] * B[i][j] * x[k][i][j];
+                }
             }
         }
     }
@@ -200,7 +234,7 @@ int PrimeiraEtapa(char verbose)
     IloObjective obj(env, soma, IloObjective::Maximize);
     modelo.add(obj);
 
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "Objective function created" << std::endl;
 
     // ███████╗    █████╗
@@ -226,7 +260,7 @@ int PrimeiraEtapa(char verbose)
             }
         }
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "Restriction 1 created" << std::endl;
 
     // (2)
@@ -244,7 +278,7 @@ int PrimeiraEtapa(char verbose)
             }
         }
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "Restriction 2 created" << std::endl;
 
     // (3)
@@ -257,12 +291,13 @@ int PrimeiraEtapa(char verbose)
             {
                 if (i < j)
                 {
-                    modelo.add(x[k][i][j] + 1 <= y[k][i] + y[k][j]);
+                    //modelo.add(x[k][i][j] + 1 <= y[k][i] + y[k][j]);
+                    modelo.add(2 * x[k][i][j] <= y[k][i] + y[k][j]);
                 }
             }
         }
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "Restriction 3 created" << std::endl;
 
     ///*
@@ -275,13 +310,14 @@ int PrimeiraEtapa(char verbose)
         {
             soma += y[k][i];
         }
-        modelo.add(soma == 4);
+        modelo.add(soma <= 4);
     }
-    if (verbose == 'v')
+    if (verbose > 1)
         std::cout << "Restriction 4 created" << std::endl;
     //*/
 
-    ///*
+    // (5)
+
     // (5)
     // para todos projetos, a soma em cada seção deve ser igual a 1
     // , para i = 1, ... , nProjetos; para j = 1, nProjetos, para k pertence K
@@ -294,12 +330,11 @@ int PrimeiraEtapa(char verbose)
         }
         modelo.add(soma == 1);
     }
-    if (verbose == 'v')
+    if (verbose > 5)
         std::cout << "Restriction 5 created" << std::endl;
-    //*/
 
     //CPLEX SOLVER
-    if (verbose == 'v')
+    if (verbose > 1)
     {
         std::cout << "Initialize CPLEX solver" << std::endl;
     }
@@ -308,6 +343,13 @@ int PrimeiraEtapa(char verbose)
     std::cout << "####################### CPLEX SOLVER ###########################\n";
     IloCplex cplex(modelo);
     cplex.setParam(IloCplex::Param::Threads, 0);
+
+    // Fixing the method to solve
+    // | Value | Symbolic Name             | Meaning
+    // |   0   | CPX_MIPSEARCH_AUTO        | Automatic: let CPLEX choose; default
+    // |   1   | CPX_MIPSEARCH_TRADITIONAL | Apply traditional branch and cut strategy; disable dynamic search
+    // |   2   | CPX_MIPSEARCH_DYNAMIC     | Apply dynamic search
+    cplex.setParam(IloCplex::Param::MIP::Strategy::Search, CPX_MIPSEARCH_TRADITIONAL);
 
     cplex.extract(modelo);
     cplex.exportModel("modeloPrimeiraEtapa.lp");
@@ -321,11 +363,14 @@ int PrimeiraEtapa(char verbose)
 
     std::cout << "Resposta" << std::endl;
 
+    cplex.out() << "y(k,j)" << std::endl;
+
     for (int k = 0; k < K.size(); k++)
     {
         for (int j = 0; j < nProjetos; j++)
         {
             cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
+
             /*
             if (cplex.getValue(y[k][j]) == 1)
             {
@@ -333,6 +378,7 @@ int PrimeiraEtapa(char verbose)
             }
             */
         }
+        std::cout << std::endl;
     }
 }
 
