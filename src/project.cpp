@@ -65,6 +65,11 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
     std::cout << "K size (math): " << nDias * nHorarios * nSalas << std::endl
               << std::endl;
 
+    if (2 * nProjetos < K.size())
+    {
+        std::cout << "O número de K é maior que o dobro do de projetos, causando um processamento desnecessario." << std::endl;
+    }
+
     if (verbose > 2)
     {
         //conferindo o resultado
@@ -367,6 +372,15 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
 
     for (int k = 0; k < K.size(); k++)
     {
+        printf("K[%d]: ", k);
+
+        for (auto secao : K[k])
+        {
+            printf(" %d, ", secao);
+        }
+
+        printf("\n");
+
         for (int j = 0; j < nProjetos; j++)
         {
             cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
