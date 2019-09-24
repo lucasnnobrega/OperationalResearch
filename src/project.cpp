@@ -372,6 +372,7 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
 
     for (int k = 0; k < K.size(); k++)
     {
+        printf("       D,  H,  S\n");
         printf("K[%d]: ", k);
 
         for (auto secao : K[k])
@@ -383,14 +384,11 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
 
         for (int j = 0; j < nProjetos; j++)
         {
-            cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
-
-            /*
+            //cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
             if (cplex.getValue(y[k][j]) == 1)
             {
-                //cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
+                cplex.out() << y[k][j] << " Value: " << cplex.getValue(y[k][j]) << std::endl;
             }
-            */
         }
         std::cout << std::endl;
     }
