@@ -296,8 +296,8 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
             {
                 if (i < j)
                 {
-                    //modelo.add(x[k][i][j] + 1 <= y[k][i] + y[k][j]);
-                    modelo.add(2 * x[k][i][j] <= y[k][i] + y[k][j]);
+                    modelo.add(x[k][i][j] + 1 >= y[k][i] + y[k][j]);
+                    //modelo.add(2 * x[k][i][j] <= y[k][i] + y[k][j]);
                 }
             }
         }
@@ -322,8 +322,6 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
     //*/
 
     // (5)
-
-    // (5)
     // para todos projetos, a soma em cada seção deve ser igual a 1
     // , para i = 1, ... , nProjetos; para j = 1, nProjetos, para k pertence K
     for (int i = 0; i < nProjetos; i++)
@@ -335,7 +333,7 @@ int PrimeiraEtapa(int nProjetos, int nDias, int nSalas, int verbose)
         }
         modelo.add(soma == 1);
     }
-    if (verbose > 5)
+    if (verbose > 1)
         std::cout << "Restriction 5 created" << std::endl;
 
     //CPLEX SOLVER
